@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>조합 게임: ㅋ + ㅏ = 카</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background:#0b0d12;
+      color:#fff;
+      text-align:center;
+      padding:20px;
+      user-select:none;
+      -webkit-user-select:none;
+      touch-action: manipulation;
+    }
+    h1{ margin:0 0 8px; font-size:22px; }
+    .hint{ color:#a9b4c7; font-size:14px; margin:0 0 16px; }
+
+    .topRow{
+      display:flex;
+      gap:14px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin: 10px 0 18px;
+    }
+
+    .card{
+      width:140px;
+      height:120px;
+      border-radius:18px;
+      border:1px solid #242b3c;
+      background:#151a25;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      cursor:pointer;
+    }
+    .big{
+      font-size:56px;
+      font-weight:900;
+      line-height:1;
+    }
+    .small{
+      margin-top:6px;
+      font-size:13px;
+      color:#a9b4c7;
+    }
+
+    .target{
+      margin: 8px auto 18px;
+      padding: 12px 14px;
+      max-width: 520px;
+      border-radius: 14px;
+      background:#101523;
+      border:1px solid #242b3c;
+    }
+    .target b{ font-size:18px; }
+
+    .slots{
+      display:flex;
+      gap:14px;
+      justify-content:center;
+      align-items:center;
+      flex-wrap:wrap;
+      margin: 6px 0 10px;
+    }
+    .slot{
+      width:160px;
+      height:110px;
+      border-radius:18px;
+      border:2px dashed #3a4764;
+      background:#0f1422;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+    }
+    .slot.filled{
+      border-style:solid;
+      border-color:#22c55e;
+      background:#0f1a16;
+    }
+    .slotLabel{
+      position:absolute;
+      top:10px;
+      left:12px;
+      font-size:12px;
+      color:#a9b4c7;
+    }
+    .slotValue{
+      font-size:54px;
+      font-weight:900;
+    }
+    .arrow{
+      font-size:24px;
+      color:#a9b4c7;
+      margin:0 6px;
+    }
+    .resultBox{
+      min-width: 130px;
+      height:110px;
+      border-radius:18px;
+      border:1px solid #242b3c;
+      background:#121725;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:54px;
+      font-weight:900;
+    }
+
+    .controls{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-top: 14px;
+    }
+    .btn{
+      padding:12px 16px;
+      font-size:15px;
+      border-radius:12px;
+      border:none;
+      cursor:pointer;
+      background:#2563eb;
+      color:#fff;
+    }
+    .btn.gray{ background:#2a3347; }
+
+    #msg{
+      min-height:28px;
+      margin-top:12px;
+      font-size:18px;
+    }
+
+    /* 드래그 중 따라다니는 유령(ghost) */
+    .ghost{
+      position:fixed;
+      left:0; top:0;
+      transform: translate(-9999px, -9999px);
+      width:110px;
+      height:100px;
+      border-radius:18px;
+      border:1px solid #242b3c;
+      background:#151a25;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:54px;
+      font-weight:900;
+      pointer-events:none;
+      z-index:9999;
+      opacity:0.95;
+    }
+
+    /* 팝업 */
+    #popup{
+      position:fixed;
+      left:0; top:0;
+      width:100%; height:100%;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,0.6);
+      z-index:10000;
+    }
+    #popup img{
+      width:240px;
+      max-width:70%;
+    }
+  </style>
+</head>
+<body>
+  <h1>조합 게임</h1>
+  <p class="hint">카드를 <b>드래그</b>해서 빈칸에 넣거나, 카드를 <b>톡</b> 눌러서 넣어도 돼요.</p>
+
+  <div class="topRow">
+    <div class="card" data-key="k" data-char="ㅋ">
+      <div class="big">ㅋ</div>
+      <div class="small">눌러서 소리</div>
+    </div>
+    <div class="card" data-key="a" data-char="ㅏ">
+      <div class="big">ㅏ</div>
+      <div class="small">눌러서 소리</div>
+    </div>
+  </div>
+
+  <div class="target">
+    오늘의 단어: <b>카</b> (ㅋ + ㅏ)
+  </div>
+
+  <div class="slots">
+    <div class="slot" id="slotC">
+      <div class="slotLabel">자음</div>
+      <div class="slotValue" id="valC"></div>
+    </div>
+
+    <div class="slot" id="slotV">
+      <div class="slotLabel">모음</div>
+      <div class="slotValue" id="valV"></div>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="resultBox" id="resultBox">?</div>
+  </div>
+
+  <div class="controls">
+    <button class="btn gray" onclick="resetSlots()">다시하기</button>
+    <button class="btn" onclick="playTarget()">🔊 카 소리 듣기</button>
+  </div>
+
+  <div id="msg"></div>
+
+  <audio id="player"></audio>
+  <div class="ghost" id="ghost"></div>
+
+  <!-- 팝업: 너가 나중에 이미지 올리면 사용 가능 -->
+  <div id="popup" onclick="hidePopup()">
+    <img id="popupImg" src="" alt="">
+  </div>
+
+  <script>
+    // ✅ 오디오 경로 (공용)
+    const sounds = {
+      k: "audio/k.m4a",
+      a: "audio/a.m4a",
+      ka: "audio/ka.m4a"
+    };
+
+    // ✅ 목표(일단 1개: 카). 나중에 배열로 확장 가능.
+    const target = { word: "카", c: "k", v: "a", sound: "ka" };
+
+    const audio = document.getElementById("player");
+    const msg = document.getElementById("msg");
+    const resultBox = document.getElementById("resultBox");
+
+    const slotC = document.getElementById("slotC");
+    const slotV = document.getElementById("slotV");
+    const valC = document.getElementById("valC");
+    const valV = document.getElementById("valV");
+
+    const ghost = document.getElementById("ghost");
+
+    let filledC = null;
+    let filledV = null;
+
+    // 팝업(이미지) — 나중에 images/correct.png, images/wrong.png 올리면 사용
+    const popup = document.getElementById("popup");
+    const popupImg = document.getElementById("popupImg");
+    function showPopup(kind){
+      // kind: "correct" | "wrong"
+      // 이미지 없으면 그냥 텍스트만 보여도 되게 처리
+      const path = kind === "correct" ? "images/correct.png" : "images/wrong.png";
+      popupImg.src = path;
+      popup.style.display = "flex";
+      // 1초 뒤 자동 닫기 (터치해도 닫힘)
+      setTimeout(hidePopup, 900);
+    }
+    function hidePopup(){ popup.style.display = "none"; }
+
+    function play(src){
+      audio.pause();
+      audio.currentTime = 0;
+      audio.src = src;
+      audio.play().catch(()=>{});
+    }
+    function playTarget(){ play(sounds[target.sound]); }
+
+    function setSlot(which, key, char){
+      if(which === "c"){
+        filledC = key;
+        valC.textContent = char;
+        slotC.classList.add("filled");
+      } else {
+        filledV = key;
+        valV.textContent = char;
+        slotV.classList.add("filled");
+      }
+      checkAnswer();
+    }
+
+    function resetSlots(){
+      filledC = null; filledV = null;
+      valC.textContent = ""; valV.textContent = "";
+      slotC.classList.remove("filled");
+      slotV.classList.remove("filled");
+      resultBox.textContent = "?";
+      msg.textContent = "";
+    }
+
+    function checkAnswer(){
+      if(!filledC || !filledV){
+        resultBox.textContent = "?";
+        msg.textContent = "";
+        return;
+      }
+
+      // 결과 표시(현재는 목표가 카 1개라서 단순)
+      if(filledC === target.c && filledV === target.v){
+        resultBox.textContent = target.word;
+        msg.textContent = "🎉 정답!";
+        playTarget();
+        // 정답 팝업(이미지) — 이미지 올리면 보임
+        showPopup("correct");
+      } else {
+        resultBox.textContent = "×";
+        msg.textContent = "❌ 다시 해볼까?";
+        showPopup("wrong");
+      }
+    }
+
+    // ✅ 탭으로 넣기(대체 입력): 카드 눌렀을 때 빈칸에 순서대로 들어가게
+    function tapInsert(key, char){
+      // 먼저 자음 칸이 비면 거기에, 아니면 모음 칸에
+      if(!filledC){
+        setSlot("c", key, char);
+      } else if(!filledV){
+        setSlot("v", key, char);
+      } else {
+        // 둘 다 찼으면: 다시하기 후 첫 칸부터
+        resetSlots();
+        setSlot("c", key, char);
+      }
+    }
+
+    // ✅ 커스텀 드래그: Pointer Events (PC/아이폰/아이패드/갤탭 모두)
+    let dragging = null; // { key, char }
+    let pointerDownPos = null;
+    let didDrag = false;
+
+    function onPointerDown(e){
+      const card = e.currentTarget;
+      const key = card.dataset.key;
+      const char = card.dataset.char;
+
+      // 클릭하면 소리(항상)
+      play(sounds[key]);
+
+      dragging = { key, char };
+      pointerDownPos = { x: e.clientX, y: e.clientY };
+      didDrag = false;
+
+      // 드래그 유령 준비
+      ghost.textContent = char;
+      ghost.style.transform = `translate(${e.clientX - 55}px, ${e.clientY - 55}px)`;
+
+      // 캡처로 이동 추적
+      card.setPointerCapture(e.pointerId);
+    }
+
+    function onPointerMove(e){
+      if(!dragging) return;
+      const dx = Math.abs(e.clientX - pointerDownPos.x);
+      const dy = Math.abs(e.clientY - pointerDownPos.y);
+
+      // 조금 움직이면 드래그로 판단
+      if(dx + dy > 8) didDrag = true;
+
+      if(didDrag){
+        ghost.style.transform = `translate(${e.clientX - 55}px, ${e.clientY - 55}px)`;
+      }
+    }
+
+    function onPointerUp(e){
+      if(!dragging) return;
+
+      // 드래그를 실제로 했을 때만 drop 판정
+      if(didDrag){
+        const dropTarget = document.elementFromPoint(e.clientX, e.clientY);
+        const droppedOnC = dropTarget && (dropTarget.id === "slotC" || dropTarget.closest("#slotC"));
+        const droppedOnV = dropTarget && (dropTarget.id === "slotV" || dropTarget.closest("#slotV"));
+
+        if(droppedOnC) setSlot("c", dragging.key, dragging.char);
+        else if(droppedOnV) setSlot("v", dragging.key, dragging.char);
+      } else {
+        // 드래그 안 했으면 탭 입력으로 처리
+        tapInsert(dragging.key, dragging.char);
+      }
+
+      // 유령 숨기기
+      ghost.style.transform = `translate(-9999px, -9999px)`;
+      dragging = null;
+      pointerDownPos = null;
+      didDrag = false;
+    }
+
+    // 카드 이벤트 연결
+    document.querySelectorAll(".card").forEach(card=>{
+      card.addEventListener("pointerdown", onPointerDown);
+      card.addEventListener("pointermove", onPointerMove);
+      card.addEventListener("pointerup", onPointerUp);
+      card.addEventListener("pointercancel", onPointerUp);
+    });
+  </script>
+</body>
+</html>
