@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>소리 듣고 맞히기 게임</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0b0d12;
+      color: white;
+      margin: 0;
+      padding: 24px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      max-width: 400px;
+      margin: 20px auto;
+    }
+
+    button {
+      font-size: 40px;
+      padding: 24px 0;
+      border-radius: 16px;
+      border: none;
+      background: #151a25;
+      color: white;
+    }
+
+    .play {
+      margin-bottom: 20px;
+      font-size: 18px;
+      padding: 12px 20px;
+      border-radius: 12px;
+      background: #2563eb;
+    }
+
+    #result {
+      font-size: 22px;
+      margin-top: 20px;
+      min-height: 28px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎧 소리 듣고 맞혀요</h1>
+
+  <button class="play" onclick="playQuestion()">🔊 소리 듣기</button>
+
+  <div class="grid">
+    <button onclick="checkAnswer('k')">ㅋ</button>
+    <button onclick="checkAnswer('a')">ㅏ</button>
+    <button onclick="checkAnswer('ka')">카</button>
+  </div>
+
+  <p id="result"></p>
+
+  <audio id="player"></audio>
+
+  <script>
+    const sounds = {
+      k: "audio/k.m4a",
+      a: "audio/a.m4a",
+      ka: "audio/ka.m4a"
+    };
+
+    let currentAnswer = null;
+
+    function playQuestion() {
+      const keys = Object.keys(sounds);
+      currentAnswer = keys[Math.floor(Math.random() * keys.length)];
+
+      const audio = document.getElementById("player");
+      audio.currentTime = 0;
+      audio.src = sounds[currentAnswer];
+      audio.play();
+
+      document.getElementById("result").textContent = "";
+    }
+
+    function checkAnswer(choice) {
+      if (!currentAnswer) return;
+
+      if (choice === currentAnswer) {
+        document.getElementById("result").textContent = "🎉 정답!";
+      } else {
+        document.getElementById("result").textContent = "❌ 다시 들어볼까?";
+      }
+    }
+  </script>
+
+</body>
+</html>
