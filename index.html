@@ -2,76 +2,87 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>한글 소리 버튼</title>
 
   <style>
+    /* ===== 전체 배경 ===== */
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(
+        ellipse at center,
+        #111827 0%,
+        #020617 70%
+      );
+      font-family: system-ui, -apple-system, sans-serif;
+      color: #ffffff;
+    }
 
-      body {
-   margin: 0;
-  min-height: 100vh;
-  background: radial-gradient(
-    ellipse at center,
-    #111827 0%,
-    #020617 70%
-  );
-  color: #ffffff;
-  font-family: system-ui, -apple-system, sans-serif;
-}
-
-
+    /* ===== 제목 ===== */
     h1 {
       text-align: center;
       margin: 40px 0 50px;
       font-size: 40px;
       letter-spacing: 2px;
-      color: #ffffff; 
+      color: #ffffff;
     }
 
-    .row {
+    /* ===== 중앙 정렬 ===== */
+    .container {
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 28px;
     }
 
-   .card {
-  width: 160px;
-  height: 140px;
-  background: #0f172a;          /* 카드 어두운 남색 */
-  border-radius: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 72px;
-  color: #ffffff;               /* 글자 흰색 */
-  cursor: pointer;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
-  user-select: none;
-  transition: transform 0.15s ease;
-}
-
-.card:active {
-  transform: scale(0.95);
-}
-
-.card:active {
-  transform: scale(0.95);
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.35); /* 파란 테두리 */
-}
-
+    /* ===== 카드 ===== */
+    .card {
+      width: 160px;
+      height: 140px;
+      background: #ffffff;          /* 흰 카드 */
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 72px;
+      font-weight: 600;
+      color: #020617;               /* 배경색 계열 글자 */
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+      transition: transform 0.15s ease;
+    }
 
     .card:active {
       transform: scale(0.95);
-      box-shadow: 0 0 0 2px #38bdf8;
+      box-shadow: 0 0 0 4px rgba(37,99,235,0.25);
     }
 
-    .op{
-  font-size: 48px;
-  font-weight: 700;
-  color: #ffffff;   /* 흰색 */
-  margin: 0 16px;
-  user-select: none;
-}
+    /* ===== +, = 기호 ===== */
+    .op {
+      font-size: 48px;
+      font-weight: 700;
+      color: #ffffff;
+      user-select: none;
+    }
+
+    /* ===== 반응형 (태블릿/모바일) ===== */
+    @media (max-width: 600px) {
+      .container {
+        gap: 18px;
+      }
+
+      .card {
+        width: 120px;
+        height: 110px;
+        font-size: 56px;
+      }
+
+      .op {
+        font-size: 36px;
+      }
+    }
   </style>
 </head>
 
@@ -79,23 +90,23 @@
 
   <h1>한글 소리 버튼</h1>
 
-  <div class="row">
-    <div class="card" onclick="play('audio/k.m4a')">ㅋ</div>
+  <div class="container">
+    <div class="card" onclick="playSound('audio/k.m4a')">ㅋ</div>
     <div class="op">+</div>
-    <div class="card" onclick="play('audio/a.m4a')">ㅏ</div>
+    <div class="card" onclick="playSound('audio/a.m4a')">ㅏ</div>
     <div class="op">=</div>
-    <div class="card" onclick="play('audio/ka.m4a')">카</div>
+    <div class="card" onclick="playSound('audio/ka.m4a')">카</div>
   </div>
 
+  <!-- 오디오 플레이어 -->
   <audio id="player"></audio>
 
   <script>
-    const player = document.getElementById("player");
-
-    function play(src) {
-      player.src = src;
-      player.currentTime = 0;
-      player.play();
+    function playSound(src) {
+      const audio = document.getElementById("player");
+      audio.src = src;
+      audio.currentTime = 0;
+      audio.play();
     }
   </script>
 
