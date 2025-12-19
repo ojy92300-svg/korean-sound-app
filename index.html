@@ -7,12 +7,16 @@
   <style>
 
       body {
-  margin: 0;
-  background: #ffffff;   /* ✅ 흰 단색 */
-  color: #111827;        /* ✅ 글자는 진한 회색/검정 */
+   margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(
+    ellipse at center,
+    #111827 0%,
+    #020617 70%
+  );
+  color: #ffffff;
   font-family: system-ui, -apple-system, sans-serif;
 }
-
 
 
     h1 {
@@ -32,16 +36,21 @@
    .card {
   width: 160px;
   height: 140px;
-  background: #f3f4f6;                
+  background: #0f172a;          /* 카드 어두운 남색 */
   border-radius: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 72px;
+  color: #ffffff;               /* 글자 흰색 */
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
   user-select: none;
+  transition: transform 0.15s ease;
+}
+
+.card:active {
+  transform: scale(0.95);
 }
 
 .card:active {
@@ -56,11 +65,11 @@
     }
 
     .op{
-  font-size: 44px;     /* 기호 크기 */
+  font-size: 48px;
   font-weight: 700;
-  color: #111827;
+  color: #ffffff;   /* 흰색 */
+  margin: 0 16px;
   user-select: none;
-  line-height: 1;
 }
   </style>
 </head>
